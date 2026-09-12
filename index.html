@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Browser-based rich-text notepad. Unique URL per note, saved in your browser." />
+    <title>Online Notepad</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%231c3d5a'/%3E%3Crect x='8' y='6' width='16' height='20' rx='1.5' fill='%23f4ecd8'/%3E%3Cpath d='M11 11h10M11 15h10M11 19h7' stroke='%231c3d5a' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E" />
+    <link rel="stylesheet" href="css/app.css" />
+  </head>
+  <body>
+    <div class="app">
+      <header class="topbar">
+        <div class="brand">
+          <span class="brand-mark" aria-hidden="true"></span>
+          <h1>Online Notepad</h1>
+        </div>
+        <label class="doc-title-wrap">
+          <span class="sr-only">Document title</span>
+          <input id="doc-title" type="text" maxlength="120" placeholder="Untitled note" spellcheck="true" />
+        </label>
+        <div class="topbar-meta">
+          <span id="save-state">Saved</span>
+          <button type="button" id="copy-link" class="ghost" title="Copy unique note URL">Copy link</button>
+        </div>
+      </header>
+
+      <nav class="menubar" aria-label="Application">
+        <div class="menu" data-menu="file">
+          <button type="button" class="menu-btn">File</button>
+          <div class="menu-panel" role="menu">
+            <button type="button" data-action="new">New</button>
+            <button type="button" data-action="open">Open…</button>
+            <button type="button" data-action="import-txt">Import .txt</button>
+            <hr />
+            <button type="button" data-action="save">Save</button>
+            <button type="button" data-action="export-txt">Export as .txt</button>
+            <button type="button" data-action="export-pdf">Export as .pdf</button>
+            <button type="button" data-action="export-docx">Export as .docx</button>
+            <button type="button" data-action="export-png">Export as image</button>
+            <hr />
+            <button type="button" data-action="print">Print</button>
+          </div>
+        </div>
+        <div class="menu" data-menu="edit">
+          <button type="button" class="menu-btn">Edit</button>
+          <div class="menu-panel" role="menu">
+            <button type="button" data-action="undo">Undo</button>
+            <button type="button" data-action="redo">Redo</button>
+            <hr />
+            <button type="button" data-action="cut">Cut</button>
+            <button type="button" data-action="copy">Copy</button>
+            <button type="button" data-action="paste">Paste</button>
+            <button type="button" data-action="select-all">Select All</button>
+            <hr />
+            <button type="button" data-action="find">Find &amp; Replace</button>
+          </div>
+        </div>
+        <div class="menu" data-menu="insert">
+          <button type="button" class="menu-btn">Insert</button>
+          <div class="menu-panel" role="menu">
+            <button type="button" data-action="link">Link…</button>
+            <button type="button" data-action="image">Image…</button>
+            <button type="button" data-action="table">Table</button>
+            <button type="button" data-action="special">Special Characters…</button>
+          </div>
+        </div>
+        <div class="menu" data-menu="view">
+          <button type="button" class="menu-btn">View</button>
+          <div class="menu-panel" role="menu">
+            <button type="button" data-action="fullscreen">Full Screen</button>
+            <button type="button" data-action="toggle-count">Word Count</button>
+            <button type="button" data-action="theme">Theme / Dark Mode</button>
+          </div>
+        </div>
+        <div class="menu" data-menu="help">
+          <button type="button" class="menu-btn">Help</button>
+          <div class="menu-panel" role="menu">
+            <button type="button" data-action="shortcuts">Keyboard Shortcuts</button>
+            <button type="button" data-action="about">About</button>
+          </div>
+        </div>
+      </nav>
+
+      <div class="toolbar" role="toolbar" aria-label="Quick actions">
+        <div class="tool-group">
+          <button type="button" data-action="new" title="New document">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h7l5 5v13H7V3z" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M14 3v5h5" fill="none" stroke="currentColor" stroke-width="1.7"/></svg>
+          </button>
+          <button type="button" data-action="undo" title="Undo">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8H4v4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M5 12a7 7 0 1 0 2-5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+          </button>
+          <button type="button" data-action="redo" title="Redo">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 8h4v4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M19 12a7 7 0 1 1-2-5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+          </button>
+          <button type="button" data-action="save" title="Save / download">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h11l4 4v12H5V4z" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M8 4v6h8V4M8 20v-6h8v6" fill="none" stroke="currentColor" stroke-width="1.7"/></svg>
+          </button>
+          <button type="button" data-action="print" title="Print">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 8V4h10v4M7 16H5a2 2 0 0 1-2-2v-4h18v4a2 2 0 0 1-2 2h-2" fill="none" stroke="currentColor" stroke-width="1.7"/><rect x="7" y="14" width="10" height="6" fill="none" stroke="currentColor" stroke-width="1.7"/></svg>
+          </button>
+        </div>
+        <div class="tool-group">
+          <button type="button" data-action="cut" title="Cut">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="7" cy="17" r="2.2" fill="none" stroke="currentColor" stroke-width="1.7"/><circle cx="17" cy="17" r="2.2" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M8.6 15.4 19 4M15.4 15.4 5 4" fill="none" stroke="currentColor" stroke-width="1.7"/></svg>
+          </button>
+          <button type="button" data-action="copy" title="Copy">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="11" height="12" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M5 16V5h10" fill="none" stroke="currentColor" stroke-width="1.7"/></svg>
+          </button>
+          <button type="button" data-action="paste" title="Paste">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6h8M9 4h6v4H9V4z" fill="none" stroke="currentColor" stroke-width="1.7"/><rect x="6" y="7" width="12" height="13" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.7"/></svg>
+          </button>
+          <button type="button" data-action="find" title="Find & replace">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="5.5" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="m15 15 5 5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+          </button>
+        </div>
+        <div class="tool-group format">
+          <button type="button" data-cmd="bold" title="Bold"><strong>B</strong></button>
+          <button type="button" data-cmd="italic" title="Italic"><em>I</em></button>
+          <button type="button" data-cmd="underline" title="Underline"><span class="u">U</span></button>
+          <button type="button" data-cmd="strikeThrough" title="Strikethrough"><span class="s">S</span></button>
+          <label class="color-tool" title="Text color">
+            <span>A</span>
+            <input id="text-color" type="color" value="#1a1a1a" />
+          </label>
+          <label class="color-tool" title="Highlight">
+            <span class="hl">A</span>
+            <input id="hilite-color" type="color" value="#ffe08a" />
+          </label>
+        </div>
+        <div class="tool-group">
+          <label class="sr-only" for="font-family">Font family</label>
+          <select id="font-family" title="Font family">
+            <option value="Arial, Helvetica, sans-serif">Arial</option>
+            <option value="Georgia, serif">Georgia</option>
+            <option value="'Times New Roman', Times, serif">Times New Roman</option>
+            <option value="'Courier New', Courier, monospace">Monospace</option>
+            <option value="Verdana, Geneva, sans-serif">Verdana</option>
+            <option value="Palatino, 'Palatino Linotype', serif">Palatino</option>
+            <option value="Garamond, serif">Garamond</option>
+          </select>
+          <label class="sr-only" for="font-size">Font size</label>
+          <select id="font-size" title="Font size">
+            <option value="2">12pt</option>
+            <option value="3" selected>14pt</option>
+            <option value="4">16pt</option>
+            <option value="5">18pt</option>
+            <option value="6">24pt</option>
+            <option value="7">36pt</option>
+          </select>
+        </div>
+        <div class="tool-group">
+          <button type="button" data-action="image" title="Insert image">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="14" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.7"/><circle cx="9" cy="10" r="1.5" fill="currentColor"/><path d="m7 17 4-4 3 3 2-2 3 3" fill="none" stroke="currentColor" stroke-width="1.7"/></svg>
+          </button>
+          <button type="button" data-action="download-images" title="Download images">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M8 11l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M5 19h14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+          </button>
+          <button type="button" data-action="fullscreen" title="Fullscreen">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 4H4v4M16 4h4v4M8 20H4v-4M16 20h4v-4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <main class="workspace" id="workspace">
+        <article class="paper">
+          <div id="editor" class="editor" contenteditable="true" spellcheck="true" role="textbox" aria-multiline="true" aria-label="Note"></div>
+        </article>
+      </main>
+
+      <footer class="statusbar">
+        <span id="note-url"></span>
+        <span id="word-count" class="count-on">0 words · 0 characters</span>
+      </footer>
+    </div>
+
+    <input id="file-open" type="file" accept=".txt,text/plain,.html,text/html" hidden />
+    <input id="file-image" type="file" accept="image/*" hidden />
+
+    <div id="modal" class="modal" hidden>
+      <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+        <header>
+          <h2 id="modal-title"></h2>
+          <button type="button" class="icon-close" data-action="close-modal" aria-label="Close">×</button>
+        </header>
+        <div id="modal-body"></div>
+      </div>
+    </div>
+
+    <div id="toast" class="toast" hidden></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
+    <script src="js/app.js"></script>
+  </body>
+</html>
