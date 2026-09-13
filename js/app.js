@@ -18,10 +18,18 @@
   const toastEl = document.getElementById("toast");
   const fileOpen = document.getElementById("file-open");
   const fileImage = document.getElementById("file-image");
+  const emojiPickerBtn = document.getElementById("emoji-picker-btn");
+  const emojiPicker = document.getElementById("emoji-picker");
 
   let noteId = null;
   let saveTimer = null;
   let selectedImage = null;
+
+  const TITLE_EMOJIS = ["📝", "📌", "⭐", "✅", "🔥", "💡", "📅", "🎯", "📚", "💼", "🏠", "🛒", "✈️", "🎉", "❤️", "⚠️"];
+
+  function syncDocumentTitle() {
+    document.title = titleInput.value.trim() || "Untitled note";
+  }
 
   function cookiePath() {
     let path = location.pathname.replace(/index\.html$/, "");
@@ -141,6 +149,7 @@
     editor.innerHTML = payload?.html || "";
     selectedImage = null;
     updateCounts();
+    syncDocumentTitle();
   }
 
   function scheduleSave() {
@@ -581,7 +590,46 @@
     updateCounts();
     scheduleSave();
   });
-  titleInput.addEventListener("input", scheduleSave);
+  titleInput.addEventListener("input", () => {
+    syncDocumentTitle();
+    scheduleSave();
+  });
+
+  function closeEmojiPicker() {
+    emojiPicker.hidden = true;
+    emojiPickerBtn.setAttribute("aria-expanded", "false");
+  }
+
+  function openEmojiPicker() {
+    emojiPicker.innerHTML = TITLE_EMOJIS.map((e) => `<button type="button" data-emoji="${e}" title="Insert ${e}">${e}</button>`).join("");
+    emojiPicker.hidden = false;
+    emojiPickerBtn.setAttribute("aria-expanded", "true");
+  }
+
+  emojiPickerBtn.addEventListener("click", (event) => {
+    event.stopPropagation();
+    if (emojiPicker.hidden) openEmojiPicker();
+    else closeEmojiPicker();
+  });
+
+  emojiPicker.addEventListener("click", (event) => {
+    const emoji = event.target.closest("[data-emoji]")?.dataset.emoji;
+    if (!emoji) return;
+    const start = titleInput.selectionStart ?? titleInput.value.length;
+    const end = titleInput.selectionEnd ?? titleInput.value.length;
+    const value = titleInput.value;
+    titleInput.value = `${value.slice(0, start)}${emoji} ${value.slice(end)}`;
+    const caret = start + emoji.length + 1;
+    titleInput.focus();
+    titleInput.setSelectionRange(caret, caret);
+    syncDocumentTitle();
+    scheduleSave();
+    closeEmojiPicker();
+  });
+
+  document.addEventListener("click", (event) => {
+    if (!emojiPicker.hidden && !event.target.closest(".doc-title-wrap")) closeEmojiPicker();
+  });
 
   editor.addEventListener("dblclick", (event) => {
     if (event.target.closest("img")) saveSelectedImage();
@@ -646,6 +694,7 @@
     if (event.key === "Escape") {
       closeMenus();
       closeModal();
+      closeEmojiPicker();
     }
     if (!mod) return;
     const key = event.key.toLowerCase();

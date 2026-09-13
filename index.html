@@ -15,10 +15,12 @@
           <span class="brand-mark" aria-hidden="true"></span>
           <h1>Online Notepad</h1>
         </div>
-        <label class="doc-title-wrap">
-          <span class="sr-only">Document title</span>
+        <div class="doc-title-wrap">
+          <button type="button" id="emoji-picker-btn" class="emoji-btn" title="Add emoji to title" aria-haspopup="true" aria-expanded="false">🙂</button>
+          <label class="sr-only" for="doc-title">Document title</label>
           <input id="doc-title" type="text" maxlength="120" placeholder="Untitled note" spellcheck="true" />
-        </label>
+          <div id="emoji-picker" class="emoji-picker" hidden role="menu" aria-label="Pick an emoji for the title"></div>
+        </div>
         <div class="topbar-meta">
           <span id="save-state">Saved</span>
           <button type="button" id="copy-link" class="ghost" title="Copy unique note URL">Copy link</button>
