@@ -17,7 +17,7 @@ Each note has its own address, for example:
 - **Insert:** Links, images, tables, special characters
 - **View:** Full screen, word count, dark mode
 - **Help:** Keyboard shortcuts and About
-- **Images:** Insert from file or paste; double-click an image to save it; toolbar downloads every image in the note
+- **Images:** Insert from file or paste; double-click an image to save it; "Download All Images" button next to Help menu (and in toolbar) downloads all images in the note with unique incremental names (`note-1`, `note-2`, etc. using notepad name as prefix)
 - **Shortcuts:** `Ctrl/Cmd+S` save, `Ctrl/Cmd+Z` undo, `Ctrl/Cmd+F` find, `Ctrl/Cmd+P` print
 
 ## Storage

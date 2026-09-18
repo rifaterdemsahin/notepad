@@ -390,43 +390,106 @@
     return [...editor.querySelectorAll("img")];
   }
 
+  function notepadPrefix() {
+    let raw = (titleInput.value || firstLineTitle() || "note").trim();
+    if (raw.toLowerCase() === "untitled note" || raw.toLowerCase() === "untitled") {
+      raw = firstLineTitle() || "note";
+    }
+    let clean = raw.replace(/[^\w\- ]+/g, "").trim().replace(/\s+/g, "-");
+    if (!clean || clean.toLowerCase() === "untitled-note" || clean.toLowerCase() === "untitled") {
+      const fallback = (firstLineTitle() || "note").trim().replace(/[^\w\- ]+/g, "").trim().replace(/\s+/g, "-");
+      clean = fallback;
+    }
+    if (!clean || clean.toLowerCase() === "untitled-note" || clean.toLowerCase() === "untitled") {
+      return "note";
+    }
+    return clean.slice(0, 60);
+  }
+
+  function getImageExt(src) {
+    if (src.startsWith("data:")) {
+      const match = src.match(/^data:(image\/[a-zA-Z0-9.+-]+);base64,/i);
+      let ext = (match?.[1] || "image/png").split("/")[1].toLowerCase().replace("jpeg", "jpg");
+      return ext.split("+")[0] || "png";
+    }
+    try {
+      const url = new URL(src, window.location.href);
+      const m = url.pathname.match(/\.(png|jpe?g|webp|gif|svg|avif|bmp|ico)$/i);
+      if (m) return m[1].toLowerCase().replace("jpeg", "jpg");
+    } catch (_) {}
+    return "png";
+  }
+
+  async function downloadImageItem(src, filename) {
+    if (src.startsWith("data:") || src.startsWith("blob:")) {
+      const a = document.createElement("a");
+      a.href = src;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      return;
+    }
+
+    try {
+      const res = await fetch(src, { mode: "cors" });
+      if (res.ok) {
+        const blob = await res.blob();
+        const blobUrl = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = blobUrl;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
+        return;
+      }
+    } catch (_) {}
+
+    const a = document.createElement("a");
+    a.href = src;
+    a.download = filename;
+    a.target = "_blank";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  }
+
   function downloadImages() {
     const images = editorImages();
     if (!images.length) {
       toast("No images in this note");
       return;
     }
+    const prefix = notepadPrefix();
     images.forEach((img, index) => {
       const src = img.getAttribute("src") || "";
-      if (src.startsWith("data:")) {
-        const match = src.match(/^data:(image\/[a-zA-Z0-9.+-]+);base64,/);
-        const ext = (match?.[1] || "image/png").split("/")[1].replace("jpeg", "jpg");
-        const a = document.createElement("a");
-        a.href = src;
-        a.download = `${fileBase()}-image-${index + 1}.${ext}`;
-        a.click();
-      } else {
-        const a = document.createElement("a");
-        a.href = src;
-        a.download = `${fileBase()}-image-${index + 1}`;
-        a.target = "_blank";
-        a.click();
-      }
+      if (!src) return;
+      const ext = getImageExt(src);
+      const filename = `${prefix}-${index + 1}.${ext}`;
+      setTimeout(() => {
+        downloadImageItem(src, filename);
+      }, index * 120);
     });
     toast(`Downloading ${images.length} image${images.length === 1 ? "" : "s"}`);
   }
 
   function saveSelectedImage() {
-    const img = selectedImage || editorImages().at(-1);
+    const images = editorImages();
+    const img = selectedImage || images.at(-1);
     if (!img) {
       toast("Select an image first");
       return;
     }
     const src = img.getAttribute("src") || "";
-    const a = document.createElement("a");
-    a.href = src;
-    a.download = `${fileBase()}-image.png`;
-    a.click();
+    if (!src) return;
+    const ext = getImageExt(src);
+    const prefix = notepadPrefix();
+    const idx = images.indexOf(img);
+    const num = idx >= 0 ? idx + 1 : 1;
+    const filename = `${prefix}-${num}.${ext}`;
+    downloadImageItem(src, filename);
   }
 
   async function pasteFromClipboard() {
@@ -521,11 +584,12 @@
     shortcuts: shortcutsModal,
     about: aboutModal,
     "download-images": downloadImages,
+    "download-all-images": downloadImages,
     "close-modal": closeModal,
   };
 
   document.addEventListener("click", (event) => {
-    const menuBtn = event.target.closest(".menu-btn");
+    const menuBtn = event.target.closest(".menu > .menu-btn");
     if (menuBtn) {
       const menu = menuBtn.parentElement;
       const wasOpen = menu.classList.contains("open");
@@ -562,7 +626,7 @@
       editor.querySelectorAll("img.selected").forEach((img) => img.classList.remove("selected"));
       selectedImage = event.target.closest("img");
       selectedImage.classList.add("selected");
-    } else if (!event.target.closest("[data-action='download-images']")) {
+    } else if (!event.target.closest("[data-action='download-images'], [data-action='download-all-images']")) {
       editor.querySelectorAll("img.selected").forEach((img) => img.classList.remove("selected"));
       if (!event.target.closest("#editor")) selectedImage = null;
     }
